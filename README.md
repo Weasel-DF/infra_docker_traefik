@@ -22,6 +22,8 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/CN=*.local"
 ```
 
+Les certificats seront créés dans le dossier `certs/` pour les domaines en `.local` (wildcard).
+
 ## Services inclus
 - **Traefik** : Un reverse proxy moderne et dynamique qui facilite la gestion des certificats SSL et le routage des requêtes HTTP/HTTPS.
 - **Odoo** : Une suite d'applications de gestion d'entreprise open source, incluant des modules pour la comptabilité, la gestion des stocks, les ventes, etc.
