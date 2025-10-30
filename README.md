@@ -26,6 +26,27 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 Les certificats seront créés dans le dossier `certs/` pour les domaines en `.local` (wildcard).
 
+### Créer un fichier .env contenant les variables d'environnement
+
+Pour personnaliser les configurations, créez un fichier `.env` à la racine du projet avec les variables suivantes (exemple) :
+
+```
+POSTGRES_PASSWORD=p@ssw0rd
+
+NEXTCLOUD_HOST=nextcloud.local
+NEXTCLOUD_DB=nextcloud
+NEXTCLOUD_DB_USER=nextcloud
+NEXTCLOUD_DB_PASSWORD=p@ssw0rd
+NEXTCLOUD_ADMIN_USER=admin
+NEXTCLOUD_ADMIN_PASSWORD=p@ssw0rd
+
+ODOO_HOST=odoo.local
+ODOO_DB_USER=odoo
+ODOO_DB_PASSWORD=p@ssw0rd
+
+PORTAINER_HOST=portainer.local
+```
+
 ## Services inclus
 - **Traefik** : Un reverse proxy moderne et dynamique qui facilite la gestion des certificats SSL et le routage des requêtes HTTP/HTTPS.
 - **Odoo** : Une suite d'applications de gestion d'entreprise open source, incluant des modules pour la comptabilité, la gestion des stocks, les ventes, etc.
