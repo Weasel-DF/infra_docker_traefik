@@ -13,6 +13,8 @@ Pour le TP nécessite d'inscrire dans le fichier host les entrées suivantes (à
 127.0.0.1 portainer.local
 ```
 
+**Note : Sous Windows, les PowerToys contiennent un utilitaire de gestion des entrées DNS qui facilite la modification du fichier hosts.**
+
 ### Création des clés SSL
 Pour générer des certificats SSL auto-signés pour les services, vous pouvez utiliser la commande suivante (en adaptant selon votre configuration) :
 
@@ -35,4 +37,3 @@ Les certificats seront créés dans le dossier `certs/` pour les domaines en `.l
 - **Odoo** : Accessible via `http://odoo.local`
 - **NextCloud** : Accessible via `http://nextcloud.local`
 - **Portainer** : Accessible via `http://portainer.local`   
-

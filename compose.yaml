@@ -20,7 +20,7 @@ services:
     container_name: infra-db
     restart: always
     environment:
-      - POSTGRES_PASSWORD=p@ssw0rd
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-default_p@ssw0rd}
     volumes:
       - db_data:/var/lib/postgresql
       - ./init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
@@ -43,15 +43,15 @@ services:
       - nextcloud_data:/var/www/html
     environment:
       - POSTGRES_HOST=infra-db
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
-      - POSTGRES_PASSWORD=p@ssw0rd
-      - NEXTCLOUD_ADMIN_USER=admin
-      - NEXTCLOUD_ADMIN_PASSWORD=p@ssw0rd
-      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.local
+      - POSTGRES_DB=${NEXTCLOUD_DB:-nextcloud}
+      - POSTGRES_USER=${NEXTCLOUD_DB_USER:-nextcloud}
+      - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD:-default_p@ssw0rd}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER:-admin}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD:-default_p@ssw0rd}
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS:-nextcloud.local}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.local`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`${NEXTCLOUD_HOST:-nextcloud.local}`)"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
       - "traefik.http.routers.nextcloud.tls=true"
     networks:
@@ -66,13 +66,13 @@ services:
         condition: service_healthy
     environment:
       - HOST=infra-db
-      - USER=odoo
-      - PASSWORD=p@ssw0rd
+      - USER=${ODOO_DB_USER:-odoo}
+      - PASSWORD=${ODOO_DB_PASSWORD:-default_p@ssw0rd}
     volumes:
       - odoo_data:/var/lib/odoo
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.odoo.rule=Host(`odoo.local`)"
+      - "traefik.http.routers.odoo.rule=Host(`${ODOO_HOST:-odoo.local}`)"
       - "traefik.http.routers.odoo.entrypoints=websecure"
       - "traefik.http.routers.odoo.tls=true"
     networks:
@@ -87,7 +87,7 @@ services:
       - portainer_data:/data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.local`)"
+      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_HOST:-portainer.local}`)"
       - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       - "traefik.http.routers.portainer.tls=true"
