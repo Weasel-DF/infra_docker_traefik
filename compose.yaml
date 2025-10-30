@@ -1,0 +1,110 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./certs:/certs:ro
+    networks:
+      - web
+      - internal
+
+  db:
+    image: postgres:latest
+    container_name: infra-db
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=p@ssw0rd
+    volumes:
+      - db_data:/var/lib/postgresql
+      - ./init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nextcloud -d nextcloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - nextcloud_data:/var/www/html
+    environment:
+      - POSTGRES_HOST=infra-db
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=p@ssw0rd
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=p@ssw0rd
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.local
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.local`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls=true"
+    networks:
+      - internal
+
+  odoo:
+    image: odoo:latest
+    container_name: odoo
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - HOST=infra-db
+      - USER=odoo
+      - PASSWORD=p@ssw0rd
+    volumes:
+      - odoo_data:/var/lib/odoo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.odoo.rule=Host(`odoo.local`)"
+      - "traefik.http.routers.odoo.entrypoints=websecure"
+      - "traefik.http.routers.odoo.tls=true"
+    networks:
+      - internal
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.local`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.tls=true"
+    networks:
+      - internal
+
+volumes:
+  db_data:
+  nextcloud_data:
+  odoo_data:
+  portainer_data:
+
+networks:
+  web:
+    driver: bridge
+    external: false
+  internal:
+    driver: bridge
+    external: false
+
